@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netflix | AI Movie Recommender</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23141414'/><text y='78' font-size='80' font-weight='900' fill='%23E50914'>N</text></svg>">
+  <link rel="stylesheet" href="/static/css/netflix.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="netflix-navbar" id="navbar">
+    <div class="nav-left">
+      <a class="brand-logo" data-view="home">
+        <span class="brand-icon">N</span>
+        <span class="brand-name">NETFLIX</span>
+        <span class="brand-badge">RECOMMENDER</span>
+      </a>
+      <ul class="nav-links">
+        <li><a class="nav-link active" data-view="home">Home</a></li>
+        <li><a class="nav-link" data-view="movies">Movies</a></li>
+        <li><a class="nav-link" data-view="toppicks">Top Picks</a></li>
+        <li><a class="nav-link" data-view="watchlist">My Watchlist</a></li>
+        <li><a class="nav-link" data-view="history">Watch History</a></li>
+        <li><a class="nav-link" data-view="search_history">Search History</a></li>
+      </ul>
+    </div>
+
+    <div class="nav-right">
+      <!-- Search Bar -->
+      <div class="search-wrapper">
+        <div class="search-bar">
+          <span style="font-size: 14px; color: #aaa;">🔍</span>
+          <input type="text" id="global-search-input" placeholder="Titles, actors, directors, genres..." autocomplete="off">
+          <span class="search-clear" id="search-clear-btn">✕</span>
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </div>
+
+      <!-- Profile Selector -->
+      <div class="profile-menu">
+        <div class="profile-pill" id="profile-pill">
+          <div class="profile-avatar avatar-netflix-red" id="active-avatar">D</div>
+          <span class="profile-name" id="active-profile-name">Default User</span>
+          <span style="font-size: 10px; color: #aaa;">▼</span>
+        </div>
+        <div class="profile-dropdown" id="profile-dropdown">
+          <div class="dropdown-section-title">Select Profile</div>
+          <div id="profile-list"></div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HOME VIEW CONTAINER -->
+  <div id="home-view-container">
+    <!-- Hero Banner -->
+    <header class="hero-banner" id="hero-banner">
+      <div class="hero-overlay-gradient"></div>
+      <div class="hero-content">
+        <div class="hero-badge">FEATURED BLOCKBUSTER</div>
+        <h1 class="hero-title" id="hero-title">Loading...</h1>
+        <div class="hero-meta">
+          <span class="meta-match" id="hero-match">98% Match</span>
+          <span class="meta-pill" id="hero-year">2015</span>
+          <span class="meta-pill" id="hero-runtime">2h 30m</span>
+          <span class="meta-pill">Ultra HD 4K</span>
+          <span class="meta-star" id="hero-star">★ 8.5</span>
+        </div>
+        <p class="hero-overview" id="hero-overview"></p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="hero-play-btn">▶ Play Trailer</button>
+          <button class="btn btn-secondary" id="hero-info-btn">ℹ More Info</button>
+          <button class="btn btn-watchlist" id="hero-watchlist-btn">+ Watchlist</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Horizontal Carousels -->
+    <main class="main-content" id="carousels-container"></main>
+  </div>
+
+  <!-- DYNAMIC VIEW CONTAINER (Movies, Watchlist, Watch History, Search History, Search Results) -->
+  <div id="dynamic-view-container" style="display: none;"></div>
+
+  <!-- INTERACTIVE MOVIE DETAIL MODAL -->
+  <div class="modal-overlay" id="movie-modal-overlay">
+    <div class="movie-modal">
+      <button class="modal-close-btn" id="modal-close-btn">✕</button>
+      <div class="modal-banner" id="modal-banner">
+        <div class="modal-banner-gradient"></div>
+        <div class="modal-banner-content">
+          <h2 class="modal-title" id="modal-title"></h2>
+          <div class="modal-tagline" id="modal-tagline"></div>
+          <div class="hero-meta" style="margin-bottom: 16px;">
+            <span class="meta-match" id="modal-match"></span>
+            <span class="meta-pill" id="modal-year"></span>
+            <span class="meta-pill" id="modal-runtime"></span>
+            <span class="meta-pill">PG-13</span>
+            <span class="meta-pill">HD</span>
+            <span class="meta-star" id="modal-star"></span>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="modal-play-btn">▶ Play / Resume</button>
+            <button class="btn btn-watchlist" id="modal-watchlist-btn">+ Watchlist</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <!-- Trailer Embed Box -->
+        <div id="modal-trailer-box" style="display: none;"></div>
+
+        <div class="modal-grid">
+          <div>
+            <h3 style="font-size: 16px; margin-bottom: 8px; color: #fff;">Overview</h3>
+            <p class="modal-overview" id="modal-overview"></p>
+          </div>
+          <div class="modal-details-side">
+            <div><b>Director:</b> <span id="modal-director"></span></div>
+            <div><b>Cast:</b> <span id="modal-cast"></span></div>
+            <div>
+              <b>Genres:</b>
+              <div id="modal-genres" style="margin-top: 6px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 Similar Recommended Movies -->
+        <div class="similar-section">
+          <h3 style="font-size: 18px; font-weight: 700; color: #fff;">More Like This (Content-Based Recommendations)</h3>
+          <div class="similar-grid" id="modal-similar-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
